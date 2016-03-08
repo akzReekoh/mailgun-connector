@@ -53,7 +53,7 @@ describe('Connector', function () {
 	});
 
 	describe('#data', function () {
-		it('should process the data', function (done) {
+		it('should process the JSON data', function (done) {
             connector.send({
                 type: 'data',
                 data: {
@@ -66,6 +66,34 @@ describe('Connector', function () {
                     bcc: 'adinglasan@reekoh.com'
                 }
             }, done);
+		});
+	});
+
+	describe('#data', function () {
+		it('should process the Array data', function (done) {
+			connector.send({
+				type: 'data',
+				data: [
+						{
+							sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
+							receiver: 'akzdinglasan@gmail.com',
+							subject: 'This is a test subject',
+							message: 'This is a test message from MailGun Connector.',
+							html: '<h1>This is a test message from MailGun Connector.</h1>',
+							cc: 'adinglasan@reekoh.com',
+							bcc: 'adinglasan@reekoh.com'
+						},
+						{
+							sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
+							receiver: 'akzdinglasan@gmail.com',
+							subject: 'This is a test subject',
+							message: 'This is a test message from MailGun Connector.',
+							html: '<h1>This is a test message from MailGun Connector.</h1>',
+							cc: 'adinglasan@reekoh.com',
+							bcc: 'adinglasan@reekoh.com'
+						}
+					]
+			}, done);
 		});
 	});
 });
