@@ -38,11 +38,11 @@ let sendData = (data, callback) => {
         }
     };
 
-    if(isEmpty(msg.cc))
-        delete msg.cc;
+    if(isEmpty(msg.formData.cc))
+        delete msg.formData.cc;
 
-    if(isEmpty(msg.bcc))
-        delete msg.bcc;
+    if(isEmpty(msg.formData.bcc))
+        delete msg.formData.bcc;
 
     request(msg, function (error, response, body) {
         if(!error){
