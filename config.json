@@ -1,44 +1,57 @@
 {
-  "api_key": {
+  "apiKey": {
 	"label": "API Key",
 	"type": "Password",
 	"required": true,
-	"help": "Please provide your Mailgun API Key."
+	"help": "Please provide your Mailgun API Key.",
+    "maxLength": 200
   },
-  "server_name": {
+  "serverName": {
     "label": "Server Name",
     "type": "String",
     "required": true,
-    "help": "Please provide your Mailgun Server Name."
+    "help": "Please provide your Mailgun Server Name.",
+    "maxLength": 200
   },
-  "default_sender": {
+  "defaultSender": {
 	"label": "Default Sender",
 	"type": "String",
 	"required": true,
-	"help": "Please provide a default sender."
+	"help": "Please provide a default sender.",
+    "maxLength": 200,
+    "format": {
+      "pattern": "/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/"
+    }
   },
-  "default_receiver": {
+  "defaultReceiver": {
     "label": "Default Receiver",
     "type": "String",
     "required": true,
-    "help": "Please provide a default receiver."
+    "help": "Please provide a default receiver.",
+    "maxLength": 200,
+    "format": {
+      "pattern": "/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/"
+    }
   },
-  "default_subject": {
+  "defaultSubject": {
     "label": "Default Subject",
     "type": "String",
     "required": true,
-    "help": "Please provide a default subject."
+    "help": "Please provide a default subject.",
+    "maxLength": 200
   },
-  "default_message": {
+  "defaultMessage": {
     "label": "Default Message",
     "type": "String",
     "required": true,
-    "help": "Please provide a default message."
+    "help": "Please provide a default message.",
+    "maxLength": 500
   },
-  "default_html": {
+  "defaultHtml": {
     "label": "Default HTML Message",
     "type": "String",
     "required": true,
-    "help": "Please provide a default HTML message."
+    "help": "Please provide a default HTML message.",
+    "maxLength": 500
   }
 }

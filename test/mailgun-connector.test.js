@@ -1,99 +1,71 @@
-'use strict';
+'use strict'
 
-const API_KEY = 'key-a39d203d081c1ed4eca747e1396508eb',
-    SERVER_NAME = 'sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org';
+const amqp = require('amqplib')
 
-var cp     = require('child_process'),
-	assert = require('assert'),
-	connector;
+const API_KEY = 'key-a39d203d081c1ed4eca747e1396508eb'
+const SERVER_NAME = 'sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org'
 
-describe('Connector', function () {
-	this.slow(5000);
+let _channel = null
+let _conn = null
+let app = null
 
-	after('terminate child process', function (done) {
-        this.timeout(7000);
-        setTimeout(function(){
-            connector.kill('SIGKILL');
-            done();
-        }, 5000);
-	});
+describe('Mailgun Connector Test', () => {
+  before('init', () => {
+    process.env.ACCOUNT = 'adinglasan'
+    process.env.CONFIG = JSON.stringify({
+      apiKey: API_KEY,
+      serverName: SERVER_NAME,
+      defaultSender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
+      defaultReceiver: 'akzdinglasan@gmail.com',
+      defaultSubject: 'This is a default subject',
+      defaultMessage: 'This is a default message from MailGun Connector.',
+      defaultHtml: '<h1>This is a default message from MailGun Connector.</h1>'
+    })
+    process.env.INPUT_PIPE = 'ip.mailgun'
+    process.env.LOGGERS = 'logger1, logger2'
+    process.env.EXCEPTION_LOGGERS = 'ex.logger1, ex.logger2'
+    process.env.BROKER = 'amqp://guest:guest@127.0.0.1/'
 
-	describe('#spawn', function () {
-		it('should spawn a child process', function () {
-			assert.ok(connector = cp.fork(process.cwd()), 'Child process not spawned.');
-		});
-	});
+    amqp.connect(process.env.BROKER)
+      .then((conn) => {
+        _conn = conn
+        return conn.createChannel()
+      }).then((channel) => {
+      _channel = channel
+    }).catch((err) => {
+      console.log(err)
+    })
+  })
 
-	describe('#handShake', function () {
-		it('should notify the parent process when ready within 5 seconds', function (done) {
-			this.timeout(5000);
+  after('close connection', function (done) {
+    _conn.close()
+    done()
+  })
 
-			connector.on('message', function (message) {
-				if (message.type === 'ready')
-					done();
-			});
+  describe('#start', function () {
+    it('should start the app', function (done) {
+      this.timeout(10000)
+      app = require('../app')
+      app.once('init', done)
+    })
+  })
 
-			connector.send({
-				type: 'ready',
-				data: {
-					options: {
-						api_key: API_KEY,
-                        server_name: SERVER_NAME,
-                        default_sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
-                        default_receiver: 'akzdinglasan@gmail.com',
-                        default_subject: 'This is a default subject',
-                        default_message: 'This is a default message from MailGun Connector.',
-                        default_html: '<h1>This is a default message from MailGun Connector.</h1>'
-					}
-				}
-			}, function (error) {
-				assert.ifError(error);
-			});
-		});
-	});
+  describe('#data', () => {
+    it('should send data to third party client', function (done) {
+      this.timeout(15000)
 
-	describe('#data', function () {
-		it('should process the JSON data', function (done) {
-            connector.send({
-                type: 'data',
-                data: {
-                    sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
-                    receiver: 'akzdinglasan@gmail.com',
-                    subject: 'This is a test subject',
-                    message: 'This is a test message from MailGun Connector.',
-                    html: '<h1>This is a test message from MailGun Connector.</h1>',
-                    cc: 'adinglasan@reekoh.com',
-                    bcc: 'adinglasan@reekoh.com'
-                }
-            }, done);
-		});
-	});
+      let data = {
+        sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
+        receiver: 'akzdinglasan@gmail.com',
+        subject: 'This is a test subject',
+        message: 'This is a test message from MailGun Connector.',
+        html: '<h1>This is a test message from MailGun Connector.</h1>',
+        cc: 'adinglasan@reekoh.com',
+        bcc: 'adinglasan@reekoh.com'
+      }
 
-	describe('#data', function () {
-		it('should process the Array data', function (done) {
-			connector.send({
-				type: 'data',
-				data: [
-						{
-							sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
-							receiver: 'akzdinglasan@gmail.com',
-							subject: 'This is a test subject',
-							message: 'This is a test message from MailGun Connector.',
-							html: '<h1>This is a test message from MailGun Connector.</h1>',
-							cc: 'adinglasan@reekoh.com',
-							bcc: 'adinglasan@reekoh.com'
-						},
-						{
-							sender: 'mailgun@sandboxb7b42b222bd5474fa3e06bdfb33d53e3.mailgun.org',
-							receiver: 'akzdinglasan@gmail.com',
-							subject: 'This is a test subject',
-							message: 'This is a test message from MailGun Connector.',
-							html: '<h1>This is a test message from MailGun Connector.</h1>',
-							cc: 'adinglasan@reekoh.com',
-							bcc: 'adinglasan@reekoh.com'
-						}
-					]
-			}, done);
-		});
-	});
-});
+      _channel.sendToQueue('ip.mailgun', new Buffer(JSON.stringify(data)))
+      setTimeout(done, 10000)
+    })
+  })
+})
